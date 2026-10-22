@@ -1780,8 +1780,58 @@ async function showMediaViewer(id) {
     else { mediaHTML = '<div style="text-align:center;color:var(--text-secondary)"><div style="font-size:64px">📦</div><div>Sin vista previa para este archivo</div></div>'; mediaType = '📦 Archivo'; }
   }
   contentDiv.innerHTML = mediaHTML;
-  const sizeMB = r.node.size ? (r.node.size / 1024 / 1024).toFixed(2) : '?';
-  infoDiv.innerHTML = `<span><strong>Tipo:</strong> ${mediaType}</span><span><strong>Nombre:</strong> ${escapeHtml(r.node.name)}</span><span><strong>Tamaño:</strong> ${sizeMB} MB</span><span style="margin-left:auto; color:var(--text-muted)">💡 Copia la ruta y úsala en src=""</span>`;
+
+  // Formato legible para el peso del archivo
+  let pesoText = '?';
+  if (r.node.size !== undefined && r.node.size !== null) {
+    const s = r.node.size;
+    if (s < 1024) pesoText = s + ' B';
+    else if (s < 1024 * 1024) pesoText = (s / 1024).toFixed(1) + ' KB';
+    else pesoText = (s / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  const isVisual = isImage(r.node.name) || isVideo(r.node.name);
+  const initialDims = isVisual ? 'cargando...' : '—';
+
+  infoDiv.innerHTML = `<span><strong>Tipo:</strong> ${mediaType}</span><span><strong>Nombre:</strong> ${escapeHtml(r.node.name)}</span><span><strong>Peso:</strong> ${pesoText}</span><span id="media-dimensions"><strong>Tamaño:</strong> ${initialDims}</span><span style="margin-left:auto; color:var(--text-muted)">💡 Copia la ruta y úsala en src=""</span>`;
+
+  if (isImage(r.node.name)) {
+    const imgEl = contentDiv.querySelector('img');
+    if (imgEl) {
+      const updateImgDims = () => {
+        const dimSpan = $('#media-dimensions');
+        if (dimSpan && imgEl.naturalWidth && imgEl.naturalHeight) {
+          dimSpan.innerHTML = `<strong>Tamaño:</strong> ${imgEl.naturalWidth} × ${imgEl.naturalHeight} px`;
+        }
+      };
+      if (imgEl.complete && imgEl.naturalWidth) updateImgDims();
+      else {
+        imgEl.addEventListener('load', updateImgDims);
+        imgEl.addEventListener('error', () => {
+          const dimSpan = $('#media-dimensions');
+          if (dimSpan) dimSpan.innerHTML = `<strong>Tamaño:</strong> —`;
+        });
+      }
+    }
+  } else if (isVideo(r.node.name)) {
+    const vidEl = contentDiv.querySelector('video');
+    if (vidEl) {
+      const updateVidDims = () => {
+        const dimSpan = $('#media-dimensions');
+        if (dimSpan && vidEl.videoWidth && vidEl.videoHeight) {
+          dimSpan.innerHTML = `<strong>Tamaño:</strong> ${vidEl.videoWidth} × ${vidEl.videoHeight} px`;
+        }
+      };
+      if (vidEl.videoWidth) updateVidDims();
+      else {
+        vidEl.addEventListener('loadedmetadata', updateVidDims);
+        vidEl.addEventListener('error', () => {
+          const dimSpan = $('#media-dimensions');
+          if (dimSpan) dimSpan.innerHTML = `<strong>Tamaño:</strong> —`;
+        });
+      }
+    }
+  }
 
   $$('.editor-wrapper').forEach(w => w.classList.remove('active'));
   const empty = $('#editor-empty');
