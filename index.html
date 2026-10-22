@@ -298,6 +298,155 @@
   .file-tree.drop-root{outline:2px dashed var(--accent);outline-offset:-3px}
   #sel-bar{display:none;align-items:center;gap:4px;padding:4px 8px;border-bottom:1px solid var(--border);font-size:11px;background:var(--bg-hover)}
   #new-file-menu { position: fixed; z-index: 2500; }
+
+  /* Búsqueda y Reemplazo estilo VS Code */
+  .search-replace-widget {
+    position: absolute;
+    top: 42px;
+    right: 18px;
+    z-index: 60;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.45);
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 380px;
+    max-width: 520px;
+    font-size: 12px;
+    user-select: none;
+    animation: srbFade 0.15s ease-out;
+  }
+  @keyframes srbFade {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .srb-row { display: flex; align-items: center; gap: 6px; }
+  .srb-input-wrap {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--bg-panel-2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0 6px;
+  }
+  .srb-input-wrap:focus-within { border-color: var(--accent); }
+  .srb-input-wrap input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 12px;
+    padding: 5px 2px;
+    outline: none;
+    font-family: inherit;
+    min-width: 100px;
+  }
+  .srb-count {
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding: 0 4px;
+    white-space: nowrap;
+  }
+  .srb-count.no-matches { color: var(--danger); font-weight: 600; }
+  .srb-count.has-matches { color: var(--accent); font-weight: 600; }
+  .srb-toggles { display: flex; align-items: center; gap: 2px; }
+  .srb-toggle-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 2px 6px;
+    line-height: 16px;
+    font-weight: 600;
+  }
+  .srb-toggle-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .srb-toggle-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .srb-actions { display: flex; align-items: center; gap: 3px; }
+  .srb-btn-icon {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 3px 5px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .srb-btn-icon:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .srb-replace-actions { display: flex; align-items: center; gap: 4px; }
+  .srb-btn-action {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 4px;
+    font-size: 11px;
+    padding: 4px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .srb-btn-action:hover { background: var(--border); }
+  .srb-btn-action.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .srb-btn-action.primary:hover { background: var(--accent-hover); }
+
+  /* Resaltado de coincidencias en CodeMirror */
+  .cm-search-match {
+    background: rgba(234, 179, 8, 0.38) !important;
+    border-bottom: 2px solid #eab308;
+    border-radius: 2px;
+  }
+  .cm-search-match-active {
+    background: #ea580c !important;
+    color: #ffffff !important;
+    border-bottom: 2px solid #c2410c;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px #ea580c;
+  }
+  [data-theme="light"] .cm-search-match {
+    background: rgba(250, 204, 21, 0.45) !important;
+    border-bottom: 2px solid #ca8a04;
+  }
+  [data-theme="light"] .cm-search-match-active {
+    background: #f97316 !important;
+    color: #ffffff !important;
+  }
+
+  .preview-page-badge {
+    font-size: 11px;
+    background: var(--bg-panel-2);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .preview-page-select {
+    background: var(--bg-panel-2);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    max-width: 180px;
+    text-overflow: ellipsis;
+  }
+  .preview-page-select:focus { border-color: var(--accent); }
 </style>
 </head>
 <body data-theme="dark">
@@ -322,6 +471,8 @@
         <div class="dropdown-item" data-action="import-replace">🔄 Importar como nuevo proyecto</div>
         <div class="dropdown-sep"></div>
         <div class="dropdown-item" data-action="save">💾 Guardar Proyecto (.zip)</div>
+        <div class="dropdown-sep"></div>
+        <div class="dropdown-item" data-action="download-editor">📥 Descargar este editor (.html único)</div>
         <div class="dropdown-sep"></div>
         <div class="dropdown-item" data-action="upload-files">⬆️ Subir archivos…</div>
         <div class="dropdown-item" data-action="download-selected">⬇️ Descargar archivo(s) seleccionado(s)</div>
@@ -431,8 +582,50 @@
       </div>
     </div>
 
-    <div class="editor-area">
+    <div class="editor-area" style="position:relative">
       <div class="editor-tabs" id="editor-tabs"></div>
+
+      <!-- Widget de Búsqueda y Reemplazo estilo VS Code -->
+      <div class="search-replace-widget" id="search-replace-widget" style="display:none">
+        <!-- Fila 1: Buscar -->
+        <div class="srb-row">
+          <button class="srb-btn-icon" id="srb-toggle-replace" title="Alternar reemplazo (Ctrl+H)">
+            <svg id="srb-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform 0.15s"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <div class="srb-input-wrap">
+            <input type="text" id="srb-find-input" placeholder="Buscar en archivo... (Enter: sig, Shift+Enter: ant)" autocomplete="off" spellcheck="false" />
+            <span class="srb-count" id="srb-count"></span>
+          </div>
+          <div class="srb-toggles">
+            <button class="srb-toggle-btn" id="srb-case-btn" title="Coincidir mayúsculas / minúsculas (Alt+C)">Aa</button>
+            <button class="srb-toggle-btn" id="srb-word-btn" title="Palabra completa (Alt+W)">\b</button>
+            <button class="srb-toggle-btn" id="srb-regex-btn" title="Expresión regular (Alt+R)">.*</button>
+          </div>
+          <div class="srb-actions">
+            <button class="srb-btn-icon" id="srb-prev-btn" title="Anterior coincidencia (Shift+Enter)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <button class="srb-btn-icon" id="srb-next-btn" title="Siguiente coincidencia (Enter)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <button class="srb-btn-icon" id="srb-close-btn" title="Cerrar búsqueda (Esc)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        <!-- Fila 2: Reemplazar -->
+        <div class="srb-row" id="srb-replace-row" style="display:none">
+          <div style="width:20px; flex-shrink:0"></div>
+          <div class="srb-input-wrap">
+            <input type="text" id="srb-replace-input" placeholder="Reemplazar con... (Enter para reemplazar)" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="srb-replace-actions">
+            <button class="srb-btn-action" id="srb-replace-one-btn" title="Reemplazar coincidencia actual">Reemplazar</button>
+            <button class="srb-btn-action primary" id="srb-replace-all-btn" title="Reemplazar todas las coincidencias">Reemplazar todo</button>
+          </div>
+        </div>
+      </div>
+
       <div class="editor-container" id="editor-container">
         <div class="empty-state" id="editor-empty">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
@@ -462,6 +655,10 @@
     <div class="preview-area">
       <div class="preview-toolbar">
         <span style="font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary)">Vista Previa</span>
+        <div style="display:flex; align-items:center; gap:6px; margin-left:8px">
+          <span style="font-size:11px; color:var(--text-muted)">Página:</span>
+          <select id="preview-page-select" class="preview-page-select" title="Seleccionar página HTML para previsualizar"></select>
+        </div>
         <div style="flex:1"></div>
         <button class="btn ghost icon-only" id="btn-refresh" title="Refrescar">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -781,6 +978,75 @@ const FS = {
       }
     }
   },
+  resolveVirtualPath(fromPath, rawUrl) {
+    if (!rawUrl || typeof rawUrl !== 'string') return null;
+    let url = rawUrl.trim();
+    if (!url) return null;
+    if (/^(https?:|\/\/|data:|blob:|mailto:|tel:|javascript:|#)/i.test(url)) return null;
+
+    let clean = url.split(/[?#]/)[0];
+    if (!clean) return null;
+    clean = clean.replace(/\\/g, '/');
+    try { clean = decodeURIComponent(clean); } catch(e) {}
+    clean = clean.trim();
+    const isRootRelative = clean.startsWith('/');
+    if (isRootRelative) clean = clean.replace(/^\/+/, '');
+    clean = clean.replace(/^\.\//, '');
+
+    const allFiles = this.listFiles();
+    if (!allFiles.length) return null;
+
+    const fromDir = fromPath ? fromPath.split('/').slice(0, -1) : [];
+    let targetParts = isRootRelative ? [] : [...fromDir];
+    for (const part of clean.split('/')) {
+      if (!part || part === '.') continue;
+      if (part === '..') {
+        if (targetParts.length > 0) targetParts.pop();
+      } else {
+        targetParts.push(part);
+      }
+    }
+    const resolvedPath = targetParts.join('/');
+    const cleanLower = clean.toLowerCase();
+    const resolvedLower = resolvedPath.toLowerCase();
+
+    // 1. Coincidencia exacta por ruta calculada relativa
+    let match = allFiles.find(f => f.path === resolvedPath);
+    if (match) return match;
+
+    // 2. Coincidencia sin distinguir mayúsculas/minúsculas (como en Windows)
+    match = allFiles.find(f => f.path.toLowerCase() === resolvedLower);
+    if (match) return match;
+
+    // 3. Coincidencia directa desde la raíz del proyecto
+    match = allFiles.find(f => f.path === clean || f.path.toLowerCase() === cleanLower);
+    if (match) return match;
+
+    // 4. Coincidencia por sufijo (útil si los archivos están dentro de una carpeta padre importada)
+    match = allFiles.find(f => f.path.endsWith('/' + clean) || f.path.toLowerCase().endsWith('/' + cleanLower));
+    if (match) return match;
+
+    // 5. Si la carpeta actual tiene un contenedor superior, buscar dentro de ese mismo contenedor
+    if (fromDir.length > 0) {
+      const topWrapper = fromDir[0];
+      match = allFiles.find(f => f.path === `${topWrapper}/${clean}` || f.path.toLowerCase() === `${topWrapper}/${cleanLower}`.toLowerCase());
+      if (match) return match;
+    }
+
+    // 6. Respaldo por nombre de archivo único (estilo explorador de Windows)
+    const fileName = clean.split('/').pop().toLowerCase();
+    const sameName = allFiles.filter(f => f.name.toLowerCase() === fileName);
+    if (sameName.length === 1) return sameName[0];
+    if (sameName.length > 1) {
+      const best = sameName.sort((a, b) => {
+        const aScore = a.path.toLowerCase().endsWith(cleanLower) ? 10 : 0;
+        const bScore = b.path.toLowerCase().endsWith(cleanLower) ? 10 : 0;
+        return bScore - aScore;
+      });
+      return best[0];
+    }
+    return null;
+  },
   async estimateUsage() { return await DB.estimateUsage(); }
 };
 
@@ -841,6 +1107,7 @@ function templateFor(name) {
 const state = {
   openTabs: [],
   activeTabId: null,
+  previewPageId: null,
   viewMode: 'split',
   deviceMode: 'desktop',
   theme: localStorage.getItem('codeforge.theme') || 'dark',
@@ -1362,10 +1629,16 @@ async function activateTab(id) {
         'Ctrl-Space': 'autocomplete',
         'Cmd-Space': 'autocomplete',
         'Shift-Ctrl-Z': 'redo', 'Shift-Cmd-Z': 'redo', 'Ctrl-Y': 'redo',
-        'Ctrl-F': 'findPersistent',
-        'Cmd-F': 'findPersistent',
-        'Ctrl-H': 'replace',
-        'Cmd-H': 'replace',
+        'Ctrl-F': () => openSearchBar(false),
+        'Cmd-F': () => openSearchBar(false),
+        'Ctrl-H': () => openSearchBar(true),
+        'Cmd-H': () => openSearchBar(true),
+        'F3': () => searchFindNext(),
+        'Shift-F3': () => searchFindPrev(),
+        'Esc': (cm) => {
+          if (searchState.active) closeSearchBar();
+          else cm.execCommand('clearSearch');
+        },
         'Ctrl-S': () => { saveCurrentEditor(); toast('Guardado', 'success', 1200); },
         'Cmd-S': () => { saveCurrentEditor(); toast('Guardado', 'success', 1200); },
         'Tab': (cm) => {
@@ -1375,7 +1648,15 @@ async function activateTab(id) {
       }
     });
 
-    cm.on('change', () => { schedulePreview(); scheduleSave(); updateStatus(); });
+    cm.on('change', () => {
+      schedulePreview();
+      scheduleSave();
+      updateStatus();
+      if (searchState.active) {
+        clearTimeout(searchState._t);
+        searchState._t = setTimeout(() => runSearch(true), 150);
+      }
+    });
     cm.on('cursorActivity', updateStatus);
     cm.on('dragover', (c, e) => { if (dragIds || [...e.dataTransfer.types].includes('Files')) e.preventDefault(); });
     cm.on('drop', (c, e) => dropOnEditor(c, e, id));
@@ -1394,6 +1675,14 @@ async function activateTab(id) {
   entry.wrapper.classList.add('active');
   if (empty) empty.classList.add('hidden');
   setTimeout(() => { entry.cm.refresh(); entry.cm.focus(); }, 50);
+  if (searchState.active) {
+    runSearch(false);
+  }
+  const r = FS.find(id);
+  if (r && isHTML(r.node.name)) {
+    state.previewPageId = id;
+    updatePreviewPageSelector();
+  }
   updateStatus();
 }
 
@@ -2053,6 +2342,16 @@ $$('#project-menu .dropdown-item').forEach(item => {
       if (nodes.length) await downloadNodes(nodes); else toast('Selecciona o abre un archivo primero', 'error');
     } else if (action === 'save') {
       await downloadProject();
+    } else if (action === 'download-editor') {
+      try {
+        const res = await fetch(window.location.href);
+        const text = await res.text();
+        const blob = new Blob([text], { type: 'text/html;charset=utf-8' });
+        saveAs(blob, 'CodeForge.html');
+        toast('Editor descargado como CodeForge.html', 'success');
+      } catch (err) {
+        toast('Error al descargar el editor', 'error');
+      }
     }
   });
 });
@@ -2081,11 +2380,23 @@ $('#folder-upload').addEventListener('change', async (e) => {
 
   toast('Importando proyecto...', 'info', 5000);
   const sorted = files.sort((a, b) => a.webkitRelativePath.split('/').length - b.webkitRelativePath.split('/').length);
-  let importCount = 0;
   
+  // Detectar si todos los archivos están envueltos en una única carpeta superior
+  const paths = files.map(f => (f.webkitRelativePath || f.name).replace(/\\/g, '/'));
+  const firstSegments = paths.map(p => p.split('/')[0]);
+  const hasCommonRoot = paths.length > 0 && paths.every(p => p.includes('/') && p.split('/')[0] === firstSegments[0]);
+
+  let importCount = 0;
   for (const file of sorted) {
-    const pathParts = file.webkitRelativePath.split('/');
+    let rel = (file.webkitRelativePath || file.name).replace(/\\/g, '/');
+    if (hasCommonRoot && mode === 'replace') {
+      // Desenvolver la carpeta superior para que los archivos queden en la raíz del proyecto
+      rel = rel.substring(firstSegments[0].length + 1);
+    }
+    const pathParts = rel.split('/').filter(Boolean);
     const fileName = pathParts.pop();
+    if (!fileName) continue;
+
     let currentPath = '';
     let parentId = null;
 
@@ -2099,25 +2410,25 @@ $('#folder-upload').addEventListener('change', async (e) => {
       parentId = folder ? folder.id : null;
     }
     
-    if (parentId !== null) {
-      let content;
-      if (isTextFile(file.name)) content = await file.text();
-      else content = file;
-      await FS.create(parentId, fileName, 'file', { content: content });
-      importCount++;
-    }
+    let content;
+    if (isTextFile(file.name)) content = await file.text();
+    else content = file;
+    await FS.create(parentId, fileName, 'file', { content: content });
+    importCount++;
   }
   
   renderTree();
   updateStorageIndicator();
+  updatePreviewPageSelector();
   schedulePreview();
   toast(`Proyecto importado (${importCount} archivos)`, 'success');
   e.target.value = '';
   e.target.dataset.mode = '';
   
-  if (mode === 'replace') {
-    const index = FS.findByPath('index.html');
-    if (index) await openFile(index.id);
+  const index = FS.findByPath('index.html') || FS.listFiles('.html')[0];
+  if (index) {
+    state.previewPageId = index.id;
+    await openFile(index.id);
   }
 });
 
@@ -2447,43 +2758,239 @@ async function downloadProject() {
   toast('Proyecto guardado como .zip', 'success');
 }
 
-$('#btn-open-new-tab').addEventListener('click', async () => {
-  await saveCurrentEditor();
-  const htmlFiles = FS.listFiles('.html');
-  if (htmlFiles.length === 0) { toast('No hay archivos HTML', 'error'); return; }
-  const main = htmlFiles.find(f => f.name.toLowerCase() === 'index.html') || htmlFiles[0];
-  
-  let html = (await FS.getContent(main.id)) || '';
-  const cssFiles = FS.listFiles('.css');
-  for (const css of cssFiles) {
-    const content = await FS.getContent(css.id);
-    const pathRegex = new RegExp(`(<link[^>]*href=["'])${escapeRegex(css.path)}(["'][^>]*>)`, 'gi');
-    const nameRegex = new RegExp(`(<link[^>]*href=["'])${escapeRegex(css.name)}(["'][^>]*>)`, 'gi');
-    html = html.replace(pathRegex, `\n<style>\n${content}\n</style>\n`).replace(nameRegex, `\n<style>\n${content}\n</style>\n`);
-  }
-  for (const js of [...FS.listFiles('.js'), ...FS.listFiles('.mjs')]) {
-    const c = ((await FS.getContent(js.id)) || '').replace(/<\/script/gi, '<\\/script');
-    const re = new RegExp(`<script([^>]*?)\\s+src=["'](?:\\./)?(?:${escapeRegex(js.path)}|${escapeRegex(js.name)})["']([^>]*)>\\s*<\/script>`, 'gi');
-    html = html.replace(re, (m, a, b) => `<script${a}${b}>\n${c}\n<\/script>`);
+/* =========================================================
+   RESOLUCIÓN DE RECURSOS Y VISTA PREVIA ESTILO WINDOWS
+   ========================================================= */
+
+async function getFileResourceUrl(nodeId, asDataUrl = false) {
+  const content = await FS.getContent(nodeId);
+  if (!content) return '';
+  const node = FS.find(nodeId)?.node;
+  const mime = node?.mime || mimeFromName(node?.name || '') || 'text/plain';
+
+  if (asDataUrl) {
+    if (typeof content === 'string') {
+      return `data:${mime};charset=utf-8,` + encodeURIComponent(content);
+    } else if (content instanceof Blob) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(content);
+      });
+    }
   }
 
-  const allFiles = FS.listFiles();
-  for (const f of allFiles) {
-    if (isMedia(f.name)) {
-      const content = await FS.getContent(f.id);
-      if (content instanceof Blob) {
-        const dataUrl = await new Promise((resolve, reject) => {
-          const r = new FileReader();
-          r.onload = () => resolve(r.result);
-          r.onerror = reject;
-          r.readAsDataURL(content);
-        });
-        html = html.replace(new RegExp(`(["'])${escapeRegex(f.path)}\\1`, 'g'), `$1${dataUrl}$1`);
-        html = html.replace(new RegExp(`(["'])${escapeRegex(f.name)}\\1`, 'g'), `$1${dataUrl}$1`);
+  // Usar Object URL para el iframe (rápido y fluido para imágenes, videos, audios)
+  if (content instanceof Blob) {
+    if (!state.blobUrls[nodeId] || !state.blobUrls[nodeId].startsWith('blob:')) {
+      if (state.blobUrls[nodeId]) {
+        try { URL.revokeObjectURL(state.blobUrls[nodeId]); } catch(e) {}
+      }
+      state.blobUrls[nodeId] = URL.createObjectURL(content);
+    }
+    return state.blobUrls[nodeId];
+  } else if (typeof content === 'string') {
+    if (mime.includes('svg') || mime.includes('xml') || isMedia(node?.name || '')) {
+      const blob = new Blob([content], { type: mime });
+      if (!state.blobUrls[nodeId] || !state.blobUrls[nodeId].startsWith('blob:')) {
+        state.blobUrls[nodeId] = URL.createObjectURL(blob);
+      }
+      return state.blobUrls[nodeId];
+    }
+    return content;
+  }
+  return '';
+}
+
+async function renderHtmlWithResolvedResources(targetHtmlId, asDataUrls = false) {
+  const htmlFiles = FS.listFiles('.html');
+  if (htmlFiles.length === 0) {
+    return '<html><body style="font-family:sans-serif;padding:40px;color:#888;text-align:center"><h2>No hay archivos HTML en el proyecto</h2></body></html>';
+  }
+
+  let targetNode = null;
+  if (targetHtmlId) {
+    const f = FS.find(targetHtmlId);
+    if (f && f.node && isHTML(f.node.name)) targetNode = f.node;
+  }
+  if (!targetNode && state.activeTabId) {
+    const f = FS.find(state.activeTabId);
+    if (f && f.node && isHTML(f.node.name)) targetNode = f.node;
+  }
+  if (!targetNode) {
+    targetNode = htmlFiles.find(f => f.name.toLowerCase() === 'index.html') || htmlFiles[0];
+  }
+
+  const currentPath = FS.getPath(targetNode.id) || targetNode.name;
+  let rawContent = await FS.getContent(targetNode.id);
+  let html = typeof rawContent === 'string' ? rawContent : defaultHTML();
+
+  // Helper para procesar CSS y sus url(...)
+  async function processCssText(cssPath, cssText) {
+    const urlRegex = /url\(\s*(['"]?)(.*?)\1\s*\)/gi;
+    const matches = [...cssText.matchAll(urlRegex)];
+    let processed = cssText;
+    for (const m of matches) {
+      const ref = m[2]?.trim();
+      if (!ref || /^(https?:|\/\/|data:|blob:|#)/i.test(ref)) continue;
+      const target = FS.resolveVirtualPath(cssPath, ref);
+      if (target) {
+        const resUrl = await getFileResourceUrl(target.id, asDataUrls);
+        if (resUrl) {
+          processed = processed.replace(m[0], `url("${resUrl}")`);
+        }
+      }
+    }
+    return processed;
+  }
+
+  // 1. Vincular archivos CSS: <link rel="stylesheet" href="...">
+  const linkRegex = /<link\b([^>]*?)>/gi;
+  const linkMatches = [...html.matchAll(linkRegex)];
+  for (const m of linkMatches) {
+    const attrs = m[1];
+    const relMatch = attrs.match(/rel=["']([^"']*)["']/i);
+    const hrefMatch = attrs.match(/href=["']([^"']*)["']/i);
+    if (!hrefMatch) continue;
+    const rel = relMatch ? relMatch[1].toLowerCase() : '';
+    const href = hrefMatch[1];
+
+    if (rel.includes('stylesheet') || href.toLowerCase().endsWith('.css')) {
+      const cssNode = FS.resolveVirtualPath(currentPath, href);
+      if (cssNode) {
+        let cssContent = (await FS.getContent(cssNode.id)) || '';
+        if (typeof cssContent === 'string') {
+          const processedCss = await processCssText(FS.getPath(cssNode.id) || cssNode.name, cssContent);
+          html = html.replace(m[0], `\n<style data-source="${escapeHtml(cssNode.name)}">\n${processedCss}\n</style>\n`);
+        }
+      }
+    } else if (rel.includes('icon')) {
+      const iconNode = FS.resolveVirtualPath(currentPath, href);
+      if (iconNode) {
+        const iconUrl = await getFileResourceUrl(iconNode.id, asDataUrls);
+        if (iconUrl) {
+          html = html.replace(m[0], m[0].replace(hrefMatch[0], `href="${iconUrl}"`));
+        }
       }
     }
   }
-  
+
+  // 2. Procesar etiquetas <style> existentes para resolver url(...)
+  const styleRegex = /<style\b([^>]*)>([\s\S]*?)<\/style>/gi;
+  const styleMatches = [...html.matchAll(styleRegex)];
+  for (const m of styleMatches) {
+    const processed = await processCssText(currentPath, m[2]);
+    html = html.replace(m[0], `<style${m[1]}>\n${processed}\n</style>`);
+  }
+
+  // 3. Procesar scripts locales: <script src="...">
+  const scriptRegex = /<script\b([^>]*?)src=["']([^"']+)["']([^>]*)>\s*<\/script>/gi;
+  const scriptMatches = [...html.matchAll(scriptRegex)];
+  for (const m of scriptMatches) {
+    const src = m[2];
+    if (/^(https?:|\/\/)/i.test(src)) continue;
+    const jsNode = FS.resolveVirtualPath(currentPath, src);
+    if (jsNode) {
+      let jsContent = (await FS.getContent(jsNode.id)) || '';
+      if (typeof jsContent === 'string') {
+        const safeJs = jsContent.replace(/<\/script/gi, '<\\/script');
+        html = html.replace(m[0], `<script${m[1]}${m[3]} data-source="${escapeHtml(jsNode.name)}">\n${safeJs}\n<\/script>`);
+      }
+    }
+  }
+
+  // 4. Procesar atributos de recursos en etiquetas (src, poster, data, background)
+  // Incluye imágenes <img>, <video>, <audio>, <source>, <embed>, <object>, etc.
+  const attrRegex = /\b(src|poster|data|background)=["']([^"']+)["']/gi;
+  const attrMatches = [...html.matchAll(attrRegex)];
+  for (const m of attrMatches) {
+    const attrName = m[1];
+    const val = m[2];
+    if (/^(https?:|\/\/|data:|blob:|mailto:|tel:|#|javascript:)/i.test(val)) continue;
+    const target = FS.resolveVirtualPath(currentPath, val);
+    if (target) {
+      const resUrl = await getFileResourceUrl(target.id, asDataUrls);
+      if (resUrl) {
+        html = html.replace(m[0], `${attrName}="${resUrl}"`);
+      }
+    }
+  }
+
+  // 5. Procesar atributos inline style="..." con url(...)
+  const inlineStyleRegex = /\bstyle=["']([^"']*url\([^"']*\)[^"']*)["']/gi;
+  const inlineStyleMatches = [...html.matchAll(inlineStyleRegex)];
+  for (const m of inlineStyleMatches) {
+    const processedStyle = await processCssText(currentPath, m[1]);
+    html = html.replace(m[0], `style="${escapeHtml(processedStyle)}"`);
+  }
+
+  // 6. Interceptor de enlaces internos:
+  // Permite hacer clic en <a href="contacto.html"> y navegar a esa página dentro de la vista previa
+  const navScript = `
+<script>
+  (function() {
+    document.addEventListener('click', function(e) {
+      var a = e.target.closest('a');
+      if (!a) return;
+      var href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || /^(https?:|\\/\\/|mailto:|tel:|javascript:)/i.test(href)) return;
+      e.preventDefault();
+      window.parent.postMessage({ type: 'codeforge-navigate', href: href, from: '${escapeHtml(currentPath)}' }, '*');
+    });
+  })();
+<\/script>
+`;
+  if (/<\/body>/i.test(html)) {
+    html = html.replace(/<\/body>/i, navScript + '\n</body>');
+  } else {
+    html += navScript;
+  }
+
+  return html;
+}
+
+function updatePreviewPageSelector() {
+  const sel = $('#preview-page-select');
+  if (!sel) return;
+  const htmlFiles = FS.listFiles('.html');
+  if (!htmlFiles.length) {
+    sel.innerHTML = '<option value="">Sin páginas</option>';
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
+  let activeId = state.previewPageId;
+  if (!activeId || !htmlFiles.some(f => f.id === activeId)) {
+    const main = htmlFiles.find(f => f.name.toLowerCase() === 'index.html') || htmlFiles[0];
+    activeId = main.id;
+    state.previewPageId = activeId;
+  }
+
+  sel.innerHTML = htmlFiles.map(f => `<option value="${f.id}" ${f.id === activeId ? 'selected' : ''}>📄 ${escapeHtml(f.path)}</option>`).join('');
+}
+
+$('#preview-page-select').addEventListener('change', (e) => {
+  state.previewPageId = e.target.value;
+  renderPreview();
+});
+
+window.addEventListener('message', async (e) => {
+  if (e.data && e.data.type === 'codeforge-navigate') {
+    const { href, from } = e.data;
+    const targetNode = FS.resolveVirtualPath(from, href);
+    if (targetNode && isHTML(targetNode.name)) {
+      state.previewPageId = targetNode.id;
+      updatePreviewPageSelector();
+      await renderPreview();
+      toast(`Navegando a: ${targetNode.name}`, 'info', 1500);
+    }
+  }
+});
+
+$('#btn-open-new-tab').addEventListener('click', async () => {
+  await saveCurrentEditor();
+  const html = await renderHtmlWithResolvedResources(state.previewPageId, true);
   const blob = new Blob([html], { type: 'text/html' });
   window.open(URL.createObjectURL(blob), '_blank');
 });
@@ -2496,39 +3003,342 @@ function schedulePreview() {
 }
 
 async function renderPreview() {
-  const htmlFiles = FS.listFiles('.html');
-  if (htmlFiles.length === 0) {
-    $('#preview').srcdoc = '<html><body style="font-family:sans-serif;padding:40px;color:#888;text-align:center"><h2>No hay archivos HTML</h2></body></html>';
-    return;
-  }
-  let main = htmlFiles.find(f => f.name.toLowerCase() === 'index.html') || htmlFiles[0];
-  let html = (await FS.getContent(main.id)) || '';
-
-  const cssFiles = FS.listFiles('.css');
-  for (const css of cssFiles) {
-    const content = await FS.getContent(css.id);
-    const pathRegex = new RegExp(`(<link[^>]*href=["'])${escapeRegex(css.path)}(["'][^>]*>)`, 'gi');
-    const nameRegex = new RegExp(`(<link[^>]*href=["'])${escapeRegex(css.name)}(["'][^>]*>)`, 'gi');
-    html = html.replace(pathRegex, `\n<style data-src="${css.path}">\n${content}\n</style>\n`).replace(nameRegex, `\n<style data-src="${css.path}">\n${content}\n</style>\n`);
-  }
-
-  const allFiles = FS.listFiles();
-  for (const f of allFiles) {
-    if (isMedia(f.name)) {
-      const content = await FS.getContent(f.id);
-      if (content instanceof Blob) {
-        if (!state.blobUrls[f.id] || !state.blobUrls[f.id].startsWith('blob:')) {
-          if (state.blobUrls[f.id]) URL.revokeObjectURL(state.blobUrls[f.id]);
-          state.blobUrls[f.id] = URL.createObjectURL(content);
-        }
-        const url = state.blobUrls[f.id];
-        html = html.replace(new RegExp(`(["'])${escapeRegex(f.path)}\\1`, 'g'), `$1${url}$1`);
-        html = html.replace(new RegExp(`(["'])${escapeRegex(f.name)}\\1`, 'g'), `$1${url}$1`);
-      }
-    }
-  }
+  updatePreviewPageSelector();
+  const html = await renderHtmlWithResolvedResources(state.previewPageId, false);
   $('#preview').srcdoc = html;
 }
+
+/* =========================================================
+   BÚSQUEDA Y REEMPLAZO AVANZADA (ESTILO VS CODE)
+   ========================================================= */
+const searchState = {
+  active: false,
+  replaceOpen: false,
+  query: '',
+  replaceText: '',
+  caseSensitive: false,
+  wholeWord: false,
+  isRegex: false,
+  matches: [],
+  currentIndex: -1,
+  markers: [],
+  _t: null
+};
+
+function getActiveCm() {
+  if (!state.activeTabId) return null;
+  return state.editors[state.activeTabId]?.cm || null;
+}
+
+function openSearchBar(withReplace = false) {
+  const cm = getActiveCm();
+  if (!cm) { toast('Abre un archivo para buscar', 'info'); return; }
+  
+  const widget = $('#search-replace-widget');
+  const replaceRow = $('#srb-replace-row');
+  const findInput = $('#srb-find-input');
+  const replaceInput = $('#srb-replace-input');
+  const chevron = $('#srb-chevron');
+
+  widget.style.display = 'flex';
+  searchState.active = true;
+
+  if (withReplace) {
+    searchState.replaceOpen = true;
+    replaceRow.style.display = 'flex';
+    chevron.style.transform = 'rotate(90deg)';
+  }
+
+  const selText = cm.getSelection();
+  if (selText && !selText.includes('\n')) {
+    findInput.value = selText;
+    searchState.query = selText;
+  } else if (!findInput.value && searchState.query) {
+    findInput.value = searchState.query;
+  }
+
+  runSearch();
+
+  if (withReplace && findInput.value) {
+    replaceInput.focus();
+    replaceInput.select();
+  } else {
+    findInput.focus();
+    findInput.select();
+  }
+}
+
+function closeSearchBar() {
+  const widget = $('#search-replace-widget');
+  if (widget) widget.style.display = 'none';
+  searchState.active = false;
+  clearSearchMarkers();
+  const cm = getActiveCm();
+  if (cm) cm.focus();
+}
+
+function toggleReplaceRow() {
+  searchState.replaceOpen = !searchState.replaceOpen;
+  const replaceRow = $('#srb-replace-row');
+  const chevron = $('#srb-chevron');
+  if (searchState.replaceOpen) {
+    replaceRow.style.display = 'flex';
+    chevron.style.transform = 'rotate(90deg)';
+    $('#srb-replace-input').focus();
+  } else {
+    replaceRow.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+    $('#srb-find-input').focus();
+  }
+}
+
+function clearSearchMarkers() {
+  if (searchState.markers && searchState.markers.length) {
+    searchState.markers.forEach(m => m.clear());
+    searchState.markers = [];
+  }
+}
+
+function buildSearchRegex() {
+  if (!searchState.query) return null;
+  let q = searchState.query;
+  if (!searchState.isRegex) {
+    q = escapeRegex(q);
+  }
+  if (searchState.wholeWord) {
+    q = `\\b(?:${q})\\b`;
+  }
+  const flags = searchState.caseSensitive ? 'g' : 'gi';
+  try {
+    return new RegExp(q, flags);
+  } catch (e) {
+    return null;
+  }
+}
+
+function runSearch(keepCurrent = false) {
+  clearSearchMarkers();
+  searchState.matches = [];
+  const countEl = $('#srb-count');
+  const cm = getActiveCm();
+
+  if (!cm || !searchState.query) {
+    searchState.currentIndex = -1;
+    countEl.textContent = '';
+    countEl.className = 'srb-count';
+    return;
+  }
+
+  const regex = buildSearchRegex();
+  if (!regex) {
+    searchState.currentIndex = -1;
+    countEl.textContent = 'Expresión inválida';
+    countEl.className = 'srb-count no-matches';
+    return;
+  }
+
+  const doc = cm.getDoc();
+  const lineCount = doc.lineCount();
+  const matches = [];
+
+  for (let l = 0; l < lineCount; l++) {
+    const lineText = doc.getLine(l);
+    regex.lastIndex = 0;
+    let match;
+    while ((match = regex.exec(lineText)) !== null) {
+      if (match[0].length === 0) {
+        regex.lastIndex++;
+        continue;
+      }
+      matches.push({
+        from: { line: l, ch: match.index },
+        to: { line: l, ch: match.index + match[0].length },
+        matchText: match[0]
+      });
+      if (!regex.global) break;
+    }
+  }
+
+  searchState.matches = matches;
+
+  if (matches.length === 0) {
+    searchState.currentIndex = -1;
+    countEl.textContent = 'Sin resultados';
+    countEl.className = 'srb-count no-matches';
+    return;
+  }
+
+  const markers = [];
+  cm.operation(() => {
+    matches.forEach(m => {
+      markers.push(cm.markText(m.from, m.to, { className: 'cm-search-match' }));
+    });
+  });
+  searchState.markers = markers;
+
+  if (!keepCurrent || searchState.currentIndex < 0 || searchState.currentIndex >= matches.length) {
+    const cur = cm.getCursor();
+    let best = 0;
+    for (let i = 0; i < matches.length; i++) {
+      if (matches[i].from.line > cur.line || (matches[i].from.line === cur.line && matches[i].from.ch >= cur.ch)) {
+        best = i;
+        break;
+      }
+    }
+    searchState.currentIndex = best;
+  }
+
+  highlightActiveMatch(true);
+}
+
+function highlightActiveMatch(scroll = true) {
+  const cm = getActiveCm();
+  const countEl = $('#srb-count');
+  if (!cm || searchState.matches.length === 0) {
+    countEl.textContent = 'Sin resultados';
+    countEl.className = 'srb-count no-matches';
+    return;
+  }
+
+  const total = searchState.matches.length;
+  const idx = searchState.currentIndex;
+  countEl.textContent = `${idx + 1} de ${total}`;
+  countEl.className = 'srb-count has-matches';
+
+  searchState.markers.forEach((m, i) => {
+    const node = m.find();
+    if (node) {
+      m.clear();
+      searchState.markers[i] = cm.markText(node.from, node.to, {
+        className: i === idx ? 'cm-search-match cm-search-match-active' : 'cm-search-match'
+      });
+    }
+  });
+
+  const active = searchState.matches[idx];
+  if (active) {
+    cm.setSelection(active.from, active.to);
+    if (scroll) {
+      cm.scrollIntoView({ from: active.from, to: active.to }, 60);
+    }
+  }
+}
+
+function searchFindNext() {
+  if (!searchState.matches.length) return;
+  searchState.currentIndex = (searchState.currentIndex + 1) % searchState.matches.length;
+  highlightActiveMatch(true);
+}
+
+function searchFindPrev() {
+  if (!searchState.matches.length) return;
+  searchState.currentIndex = (searchState.currentIndex - 1 + searchState.matches.length) % searchState.matches.length;
+  highlightActiveMatch(true);
+}
+
+function searchReplaceOne() {
+  const cm = getActiveCm();
+  if (!cm || searchState.matches.length === 0 || searchState.currentIndex < 0) return;
+  const active = searchState.matches[searchState.currentIndex];
+  const replaceStr = searchState.replaceText || '';
+
+  let replacement = replaceStr;
+  if (searchState.isRegex) {
+    try {
+      const regex = buildSearchRegex();
+      replacement = active.matchText.replace(regex, replaceStr);
+    } catch (e) {}
+  }
+
+  cm.replaceRange(replacement, active.from, active.to);
+  runSearch(true);
+  toast('Coincidencia reemplazada', 'info', 1000);
+}
+
+function searchReplaceAll() {
+  const cm = getActiveCm();
+  if (!cm || searchState.matches.length === 0) return;
+  const total = searchState.matches.length;
+  const replaceStr = searchState.replaceText || '';
+
+  cm.operation(() => {
+    for (let i = searchState.matches.length - 1; i >= 0; i--) {
+      const m = searchState.matches[i];
+      let replacement = replaceStr;
+      if (searchState.isRegex) {
+        try {
+          const regex = buildSearchRegex();
+          replacement = m.matchText.replace(regex, replaceStr);
+        } catch (e) {}
+      }
+      cm.replaceRange(replacement, m.from, m.to);
+    }
+  });
+
+  runSearch(false);
+  toast(`Se reemplazaron ${total} coincidencia${total > 1 ? 's' : ''}`, 'success', 2000);
+}
+
+// Event Listeners del Widget de Búsqueda y Reemplazo
+$('#srb-toggle-replace').addEventListener('click', toggleReplaceRow);
+$('#srb-close-btn').addEventListener('click', closeSearchBar);
+$('#srb-next-btn').addEventListener('click', searchFindNext);
+$('#srb-prev-btn').addEventListener('click', searchFindPrev);
+$('#srb-replace-one-btn').addEventListener('click', searchReplaceOne);
+$('#srb-replace-all-btn').addEventListener('click', searchReplaceAll);
+
+$('#srb-find-input').addEventListener('input', (e) => {
+  searchState.query = e.target.value;
+  runSearch();
+});
+
+$('#srb-replace-input').addEventListener('input', (e) => {
+  searchState.replaceText = e.target.value;
+});
+
+$('#srb-case-btn').addEventListener('click', function() {
+  searchState.caseSensitive = !searchState.caseSensitive;
+  this.classList.toggle('active', searchState.caseSensitive);
+  runSearch();
+});
+$('#srb-word-btn').addEventListener('click', function() {
+  searchState.wholeWord = !searchState.wholeWord;
+  this.classList.toggle('active', searchState.wholeWord);
+  runSearch();
+});
+$('#srb-regex-btn').addEventListener('click', function() {
+  searchState.isRegex = !searchState.isRegex;
+  this.classList.toggle('active', searchState.isRegex);
+  runSearch();
+});
+
+$('#srb-find-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (e.shiftKey) searchFindPrev();
+    else searchFindNext();
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    closeSearchBar();
+  } else if (e.key === 'ArrowDown' && searchState.replaceOpen) {
+    e.preventDefault();
+    $('#srb-replace-input').focus();
+  }
+});
+
+$('#srb-replace-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (e.altKey || e.ctrlKey) searchReplaceAll();
+    else searchReplaceOne();
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    closeSearchBar();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    $('#srb-find-input').focus();
+  }
+});
 
 /* =========================================================
    CONTROLES DE VISTA Y TEMA
@@ -2582,14 +3392,22 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
     e.preventDefault();
     saveCurrentEditor();
     toast('Guardado', 'success', 1200);
   }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
     e.preventDefault();
     promptNew();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+    e.preventDefault();
+    openSearchBar(false);
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
+    e.preventDefault();
+    openSearchBar(true);
   }
 });
 
